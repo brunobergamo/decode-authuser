@@ -51,11 +51,8 @@ class AuthuserApplicationTests {
 
     @Test
     public void validateUserServiceExistsByUsername() {
-        assertAll("teste", () -> assertEquals(userService.existsByUsername( "brunobergamo"),false),
+        assertAll("teste", () -> assertEquals(userService.existsByUsername( "brunobergamo"),true),
                                     () -> assertEquals(userService.existsByUsername("bruno"),false));
-
-        assertEquals(userService.existsByUsername( "brunobergamo"),false);
-   //     assertThrows(Exception.class,() -> userService.existsByUsername( "brunobergamo"));
     }
 
 }
