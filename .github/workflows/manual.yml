@@ -45,7 +45,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2.6.1
         with:
-          context: ./target
+          context: /home/runner/work/decode-authuser/decode-authuser/target/
           file: Dockerfile
           push: true
           tags: |
