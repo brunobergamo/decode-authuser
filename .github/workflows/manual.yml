@@ -30,7 +30,7 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: Package
-          path: staging
+          path: ./target
   # This workflow contains a single job called "build"
   DOCKER:
     needs: [BUILD]
