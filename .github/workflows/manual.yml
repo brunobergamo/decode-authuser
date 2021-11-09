@@ -45,8 +45,8 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2.6.1
         with:
-          context: ./authuser
-          file: ./authuser/Dockerfile
+          context: .
+          file: .Dockerfile
           push: true
           tags: |
             brunobergamo/authuser:latest
