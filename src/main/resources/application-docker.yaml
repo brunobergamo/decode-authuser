@@ -1,7 +1,9 @@
 server:
-  port: 8087
+  port: 8080
 
 spring:
+  application:
+    name: ead-authuser-service
   datasource:
     url: jdbc:postgresql://host.docker.internal:5432/ead-authuser
     username: postgres
@@ -30,4 +32,11 @@ logging:
 ead:
   api:
     url:
-      course: 'http://host.docker.internal:8082'
+      course: 'http://ead-course-service'
+
+eureka:
+  client:
+    service-url:
+      defaultZone:  ${EUREKA_URL:http://172.18.224.1:8761/eureka}
+  instance:
+    prefer-ip-address: true
