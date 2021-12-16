@@ -55,4 +55,8 @@ public class CourseClient {
                 .append("&sort=").append(pageable.getSort()).toString().replace(": ",",");
     }
 
+    public void deleteUserInCouse(UUID userId) {
+        String url = new StringBuilder(REQUEST_URI).append("/courses/users/").append(userId).toString();
+        restTemplate.delete(url);
+    }
 }
