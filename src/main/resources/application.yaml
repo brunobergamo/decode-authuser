@@ -22,6 +22,11 @@ spring:
   output:
     ansi:
       enabled: Always
+  rabbitmq:
+    host: localhost
+    port: 5672
+    password: guest
+    username: guest
 
 
 
@@ -36,6 +41,9 @@ ead:
   api:
     url:
       course: 'http://ead-course-service/ead-course'
+  broker:
+    exchange:
+      userEvent: ead.userevent
 
 eureka:
   client:
@@ -66,3 +74,10 @@ management:
       enabled: false
     prometheus:
       enabled: true
+
+resilience4j:
+  retry:
+    instances:
+      retryInstance:
+        maxRetryAttempts: 3
+        waitDuration: 5s

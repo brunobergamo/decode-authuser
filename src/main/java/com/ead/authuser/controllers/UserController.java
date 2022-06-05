@@ -37,21 +37,13 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<Page<UserModel>> getAllUsers(SpecificationTemplate.UserSpec spec,
-            @PageableDefault(page = 0, size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable,
-                                                       @RequestParam(required = false) UUID courseId){
-        Page<UserModel> userModelPage = null;
-        if(courseId != null){
-            userModelPage = userService.findAll(pageable,SpecificationTemplate.userCourseId(courseId).and(spec));
-        }else{
-            userModelPage = userService.findAll(pageable,spec);
-        }
+            @PageableDefault(page = 0, size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable){
+        Page<UserModel> userModelPage =  userService.findAll(pageable,spec);
 
         userModelPage.stream().map(userModel -> userModel.add(linkTo(methodOn(UserController.class).getUser(userModel.getUserId())).withSelfRel())).collect(Collectors.toList());
         ResponseEntity<Page<UserModel>> body = ResponseEntity.status(HttpStatus.OK).body(userModelPage);
         return body;
     }
-
-
 
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getUser(@PathVariable (value = "userId")UUID userId){
@@ -67,7 +59,7 @@ public class UserController {
         log.debug("DELETE deleteUser userId received {} ", userId);
         Optional<UserModel> userModel = userService.findById(userId);
         if(userModel.isPresent()){
-            userService.delete(userModel.get());
+            userService.deleteUser(userModel.get());
             log.debug("DELETE deleteUser userId deleted {} ", userId);
             log.info("User deleted successfully userId {} ", userId);
             return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
@@ -90,7 +82,7 @@ public class UserController {
         user.setFullName(userDto.getFullName());
         user.setPhoneNumber(userDto.getPhoneNumber());
         user.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
-        userService.save(user);
+        userService.updateUser(user);
         log.debug("PUT updateUser userModel saved {} ", user.toString());
         log.info("User updated successfully userId {} ", user.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(user);
@@ -112,7 +104,7 @@ public class UserController {
         var user = userModel.get();
         user.setPassword(userDto.getPassword());
         user.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
-        userService.save(user);
+        userService.updatePassword(user);
         log.debug("PUT updatePassword userModel saved {} ", user.toString());
         log.info("Password updated successfully userId {} ", user.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body("Password updated sucessfully.");
@@ -130,7 +122,7 @@ public class UserController {
         var user = userModel.get();
         user.setImageUrl(userDto.getImageUrl());
         user.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
-        userService.save(user);
+        userService.updateUser(user);
         log.debug("PUT updateImage userModel saved {} ", user.toString());
         log.info("Image updated successfully userId {} ", user.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(user);

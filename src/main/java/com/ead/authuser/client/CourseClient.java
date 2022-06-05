@@ -2,6 +2,7 @@ package com.ead.authuser.client;
 
 import com.ead.authuser.dtos.CourseDto;
 import com.ead.authuser.dtos.ResponsePageDto;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +30,7 @@ public class CourseClient {
     @Value("${ead.api.url.course}")
     private String REQUEST_URI;
 
+    //@Retry(name = "retryInstance",fallbackMethod = "retryfallback")
     public Page<CourseDto> getAllCoursesByUser(UUID userId, Pageable pageable){
         List<CourseDto> searchResult = null;
 
@@ -47,16 +50,16 @@ public class CourseClient {
         return new PageImpl<>(searchResult);
     }
 
+    public Page<CourseDto> retryfallback(UUID userId, Pageable pageable,Throwable t){
+        log.error("Inside retry retryfallback , cause - {}" , t.toString());
+        return new PageImpl<>(Collections.emptyList());
+    }
+
     private String getURL(UUID userId, Pageable pageable) {
         return new StringBuilder(REQUEST_URI)
                 .append("/courses?userId=").append(userId)
                 .append("&page=").append(pageable.getPageNumber())
                 .append("&size=").append(pageable.getPageSize())
                 .append("&sort=").append(pageable.getSort()).toString().replace(": ",",");
-    }
-
-    public void deleteUserInCouse(UUID userId) {
-        String url = new StringBuilder(REQUEST_URI).append("/courses/users/").append(userId).toString();
-        restTemplate.delete(url);
     }
 }

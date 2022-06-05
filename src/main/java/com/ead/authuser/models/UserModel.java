@@ -1,20 +1,17 @@
 package com.ead.authuser.models;
 
+import com.ead.authuser.dtos.UserEventDto;
 import com.ead.authuser.emuns.UserStatus;
 import com.ead.authuser.emuns.UserType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+import org.springframework.beans.BeanUtils;
 import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -65,11 +62,6 @@ public class UserModel extends RepresentationModel<UserModel> implements Seriali
     @Column(nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime lastUpdateDate;
-
-    @OneToMany(mappedBy = "userModel", fetch = FetchType.LAZY)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Fetch(FetchMode.JOIN)
-    private Set<UserCourseModel> userCourses;
 
     public UUID getUserId() {
         return userId;
@@ -164,14 +156,6 @@ public class UserModel extends RepresentationModel<UserModel> implements Seriali
         return lastUpdateDate;
     }
 
-    public Set<UserCourseModel> getUserCourses() {
-        return userCourses;
-    }
-
-    public void setUserCourses(Set<UserCourseModel> userCourses) {
-        this.userCourses = userCourses;
-    }
-
     public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
     }
@@ -191,12 +175,14 @@ public class UserModel extends RepresentationModel<UserModel> implements Seriali
                 ", imageUrl='" + imageUrl + '\'' +
                 ", creationDate=" + creationDate +
                 ", lastUpdateDate=" + lastUpdateDate +
-                ", userCourses=" + userCourses +
                 '}';
     }
 
-    public UserCourseModel convertToUserCourseModel(UUID courseId){
-        return new UserCourseModel(null,this,courseId);
+    public UserEventDto convertToUserEventDto(){
+        var userEventDto = new UserEventDto();
+        BeanUtils.copyProperties(this,userEventDto);
+        userEventDto.setUserType(this.getUserType().toString());
+        userEventDto.setUserStatus(this.getUserStatus().toString());
+        return userEventDto;
     }
-
 }

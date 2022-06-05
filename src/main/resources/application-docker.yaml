@@ -22,6 +22,11 @@ spring:
   output:
     ansi:
       enabled: Always
+  rabbitmq:
+    host: host.docker.internal
+    port: 5672
+    password: spring
+    username: spring
 
 
 logging:
