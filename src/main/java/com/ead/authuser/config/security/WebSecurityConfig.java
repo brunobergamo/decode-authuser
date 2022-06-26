@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final String[] AUTH_ALLOW_LIST = {"/ead-authuser/auth/**"};
+    private static final String[] AUTH_ALLOW_LIST = {"/auth/**"};
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -31,7 +31,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        super.configure(auth);
+        auth.inMemoryAuthentication()
+                .withUser("admin")
+                .password(passwordEncoder().encode("admin"))
+                .roles("ADMIN");
     }
 
     @Bean
