@@ -1,5 +1,7 @@
 package com.ead.authuser.controllers;
 
+import com.ead.authuser.config.security.AuthenticationCurrentUserService;
+import com.ead.authuser.config.security.UserDetailsImpl;
 import com.ead.authuser.dtos.UserDTO;
 import com.ead.authuser.models.UserModel;
 import com.ead.authuser.services.UserService;
@@ -13,6 +15,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +40,17 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AuthenticationCurrentUserService authenticationCurrentUserService;
+
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<Page<UserModel>> getAllUsers(SpecificationTemplate.UserSpec spec,
-            @PageableDefault(page = 0, size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable){
+            @PageableDefault(page = 0, size = 10, sort = "userId", direction = Sort.Direction.ASC) Pageable pageable,
+                                                       Authentication authentication){
+
+        UserDetailsImpl principal = authenticationCurrentUserService.getCurrentUser();
+        //log.info(principal.getAuthorities().toString());
         Page<UserModel> userModelPage =  userService.findAll(pageable,spec);
 
         userModelPage.stream().map(userModel -> userModel.add(linkTo(methodOn(UserController.class).getUser(userModel.getUserId())).withSelfRel())).collect(Collectors.toList());
@@ -45,8 +58,14 @@ public class UserController {
         return body;
     }
 
+    @PreAuthorize("hasAnyRole('STUDENT')")
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getUser(@PathVariable (value = "userId")UUID userId){
+        UUID authenticatedUserId = authenticationCurrentUserService.getCurrentUser().getUserId();
+        if(!authenticatedUserId.equals(userId)){
+            throw new AccessDeniedException("Forbidden");
+        }
+
         Optional<UserModel> userModel = userService.findById(userId);
         if(userModel.isEmpty()){
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found");
