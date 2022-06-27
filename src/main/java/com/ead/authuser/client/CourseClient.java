@@ -11,8 +11,11 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.header.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -34,21 +37,18 @@ public class CourseClient {
 
     //@Retry(name = "retryInstance",fallbackMethod = "retryfallback")
     @CircuitBreaker(name = "circuitbreakerInstance")//,fallbackMethod = "circuitbreakerfallback")
-    public Page<CourseDto> getAllCoursesByUser(UUID userId, Pageable pageable){
+    public Page<CourseDto> getAllCoursesByUser(UUID userId, Pageable pageable,String token){
         List<CourseDto> searchResult = null;
-
         String url = getURL(userId, pageable);
-
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization",token);
+        HttpEntity<String> requestEntity = new HttpEntity<>("parameters",headers);
         log.info("Resquest URL : {}" + url);
-        try{
-            ParameterizedTypeReference<ResponsePageDto<CourseDto>> responseType = new ParameterizedTypeReference<ResponsePageDto<CourseDto>> (){};
-            ResponseEntity<ResponsePageDto<CourseDto>> result = restTemplate.exchange(url , HttpMethod.GET,null,responseType);
-            searchResult = Objects.requireNonNull(result.getBody()).getContent();
-            log.debug("Response Number of elements : {}", searchResult.size());
-        }catch(HttpStatusCodeException e){
+        ParameterizedTypeReference<ResponsePageDto<CourseDto>> responseType = new ParameterizedTypeReference<ResponsePageDto<CourseDto>> (){};
+        ResponseEntity<ResponsePageDto<CourseDto>> result = restTemplate.exchange(url , HttpMethod.GET,requestEntity,responseType);
+        searchResult = Objects.requireNonNull(result.getBody()).getContent();
+        log.debug("Response Number of elements : {}", searchResult.size());
 
-            log.error("Error request/course {}", e);
-        }
         log.info("Ending request / courses userId {}" , userId);
         return new PageImpl<>(searchResult);
     }
