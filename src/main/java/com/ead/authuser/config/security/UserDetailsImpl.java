@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 public class UserDetailsImpl implements UserDetails {
 
     private UUID userId;
+
     private String fullName;
     private String username;
     @JsonIgnore
     private String password;
     private String email;
     private Collection<? extends  GrantedAuthority>  authorities;
-
 
     public static  UserDetailsImpl build(UserModel userModel){
 
@@ -76,5 +76,13 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 }
