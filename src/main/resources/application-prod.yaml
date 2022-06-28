@@ -1,0 +1,9 @@
+spring:
+  config:
+    import: 'configserver:${CONFIG_SERVER_URL}'
+  cloud:
+    config:
+      discovery:
+        serviceId: ead-config-server
+      username: admin
+      password: 'admin'
